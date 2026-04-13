@@ -68,7 +68,7 @@ function App() {
     }, 800);
 
     return () => clearTimeout(timeout);
-  }, [currentNote]);
+  }, [currentNote,saveNote]);
 
   if (!loggedIn) {
     return <Login setLoggedIn={setLoggedIn} />;
@@ -83,7 +83,6 @@ function App() {
     <>
     <div className={dark ? "app-container dark" : "app-container"}>
 
-      {/* 🔹 Sidebar */}
       <div className="sidebar">
         <h2>Notes</h2>
 
