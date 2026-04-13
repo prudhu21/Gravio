@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import API from './api';
 import NotesList from './components/NotesList';
 import Editor from './components/Editor';
@@ -21,25 +21,36 @@ function App() {
     content: ''
   });
 
-  useEffect(() => {
-    fetchNotes();
+  // ✅ FETCH NOTES
+  const fetchNotes = useCallback(async () => {
+    try {
+      const res = await API.get('/notes');
+      setNotes(res.data);
+    } catch (err) {
+      console.error(err);
+    }
   }, []);
 
-  const fetchNotes = async () => {
-    const res = await API.get('/notes');
-    setNotes(res.data);
-  };
-
-  const saveNote = async () => {
-    if (!currentNote.title && !currentNote.content) return;
-
-    if (currentNote.id) {
-      await API.put(`/notes/${currentNote.id}`, currentNote);
-    } else {
-      await API.post('/notes', currentNote);
-    }
+  useEffect(() => {
     fetchNotes();
-  };
+  }, [fetchNotes]);
+
+  // ✅ SAVE NOTE (FIXED)
+  const saveNote = useCallback(async (note) => {
+    if (!note.title && !note.content) return;
+
+    try {
+      if (note.id) {
+        await API.put(`/notes/${note.id}`, note);
+      } else {
+        await API.post('/notes', note);
+      }
+
+      fetchNotes();
+    } catch (err) {
+      console.error("Save failed", err);
+    }
+  }, [fetchNotes]);
 
   const deleteNote = async (id) => {
     await API.delete(`/notes/${id}`);
@@ -50,6 +61,7 @@ function App() {
       setSelectedId(null);
     }
   };
+
   const handleSelect = (note) => {
     setCurrentNote(note);
     setSelectedId(note.id);
@@ -60,15 +72,16 @@ function App() {
     note.content.toLowerCase().includes(search.toLowerCase())
   );
 
-  useEffect(() => {
-    if (!currentNote.id) return; 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+useEffect(() => {
+  if (!currentNote.id) return;
 
-    const timeout = setTimeout(() => {
-      saveNote();
-    }, 800);
+  const timeout = setTimeout(() => {
+    saveNote(currentNote);
+  }, 800);
 
-    return () => clearTimeout(timeout);
-  }, [currentNote,saveNote]);
+  return () => clearTimeout(timeout);
+}, [currentNote]);
 
   if (!loggedIn) {
     return <Login setLoggedIn={setLoggedIn} />;
@@ -80,9 +93,9 @@ function App() {
   };
 
   return (
-    <>
     <div className={dark ? "app-container dark" : "app-container"}>
 
+      {/* 🔹 Sidebar */}
       <div className="sidebar">
         <h2>Notes</h2>
 
@@ -103,6 +116,13 @@ function App() {
           onDelete={deleteNote}
           selectedId={selectedId}
         />
+
+        {/* ✅ Logout at bottom */}
+        <div className="sidebar-bottom">
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </div>
 
       {/* 🔹 Main */}
@@ -110,20 +130,13 @@ function App() {
         <Editor
           note={currentNote}
           setNote={setCurrentNote}
-          saveNote={saveNote}
+          saveNote={() => saveNote(currentNote)}
         />
 
         <Preview content={currentNote.content} />
-        <div>
-          <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
-        </div>
       </div>
 
     </div>
-    
-    </>
   );
 }
 
