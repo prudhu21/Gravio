@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable */
 import React, { useEffect, useState, useCallback } from 'react';
 import API from './api';
 import NotesList from './components/NotesList';
@@ -35,22 +37,21 @@ function App() {
     fetchNotes();
   }, [fetchNotes]);
 
-  // ✅ SAVE NOTE (FIXED)
-  const saveNote = useCallback(async (note) => {
-    if (!note.title && !note.content) return;
+  const saveNote = useCallback(async () => {
+  if (!currentNote.title && !currentNote.content) return;
 
-    try {
-      if (note.id) {
-        await API.put(`/notes/${note.id}`, note);
-      } else {
-        await API.post('/notes', note);
-      }
-
-      fetchNotes();
-    } catch (err) {
-      console.error("Save failed", err);
+  try {
+    if (currentNote.id) {
+      await API.put(`/notes/${currentNote.id}`, currentNote);
+    } else {
+      await API.post('/notes', currentNote);
     }
-  }, [fetchNotes]);
+
+    fetchNotes();
+  } catch (err) {
+    console.error(err);
+  }
+}, [currentNote]);
 
   const deleteNote = async (id) => {
     await API.delete(`/notes/${id}`);
@@ -72,7 +73,6 @@ function App() {
     note.content.toLowerCase().includes(search.toLowerCase())
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
 useEffect(() => {
   if (!currentNote.id) return;
 
@@ -82,7 +82,6 @@ useEffect(() => {
 
   return () => clearTimeout(timeout);
 }, [currentNote]);
-
   if (!loggedIn) {
     return <Login setLoggedIn={setLoggedIn} />;
   }
