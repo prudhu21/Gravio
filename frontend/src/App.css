@@ -189,7 +189,8 @@ body {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  margin-top: 690px;
+  margin-top: 390px;
+  margin-left: 1390px;
 }
 
 .logout-btn:hover {

@@ -94,7 +94,6 @@ useEffect(() => {
   return (
     <div className={dark ? "app-container dark" : "app-container"}>
 
-      {/* 🔹 Sidebar */}
       <div className="sidebar">
         <h2>Notes</h2>
 
@@ -116,7 +115,6 @@ useEffect(() => {
           selectedId={selectedId}
         />
 
-        {/* ✅ Logout at bottom */}
         <div className="sidebar-bottom">
           <button className="logout-btn" onClick={handleLogout}>
             Logout
@@ -124,7 +122,6 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* 🔹 Main */}
       <div className="main">
         <Editor
           note={currentNote}
